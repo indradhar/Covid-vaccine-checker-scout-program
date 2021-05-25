@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 5px;
+      text-align: left;
+    }
+    </style>
+  <body>
+    This is start
+    <select onblur="get_state_data()" id="state"></select>
+    <select  id="district"></select>
+  
+    <select  id="age">
+      <option value="18">
+        above age 18
+      </option>
+      <option value="45">
+        above age 45
+      </option>
+    </select>
+    <input placeholder="DD-MM-YYYY" id="date1"/>
+    <button onclick="get_data()">
+      Get Data
+    </button>
+    
+    <h2>Results</h2>
+    
+    <table style="width:100%">
+      <tr id="name">
+        <th>Name:</th>
+      </tr>
+      <tr id="address">
+        <th>address:</th>
+      </tr>
+      <tr id="vaccine_type">
+        <th>vaccine type:</th>
+      </tr>
+      
+      <tr id="min_age">
+        <th>Minimum age:</th>
+      </tr>
+      <tr id="fee_type">
+        <th>Fee Type:</th>
+      </tr>
+      <tr id="fee">
+        <th>Fee:</th>
+      </tr>
+      <tr id="available_capacity">
+        <th>Capacity Available:</th>
+      </tr>
+      <tr id="dose_1">
+        <th>1st dose Capacity:</th>
+      </tr>
+      <tr id="dose_2">
+        <th>2nd dose capacity:</th>
+      </tr>
+
+      <tr id="slot1">
+        <th>Slot 1:</th>
+      </tr>
+      <tr id="slot2">
+        <th>Slot 2:</th>
+      </tr>
+      <tr id="slot3">
+        <th>Slot 3:</th>
+      </tr>
+      <tr id="slot4">
+        <th>Slot 4:</th>
+      </tr>
+
+    </table>
+    
+    
+  </body>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"
+    integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+  <script>
+    var stateDrop = document.getElementById("state");
+    var districtDrop=document.getElementById("district");
+    axios
+      .get("https://www.cowin.gov.in/api/v2/admin/location/states",)
+      .then((res) => {
+        console.log(res.data);
+        res.data["states"].forEach((state) => {
+          var opt =document.createElement("option");
+          opt.setAttribute("value",state.state_id)
+          opt.innerHTML= `<p id="state_name${state.state_id}" >${
+            state.state_name
+          }
+            </p>`
+          stateDrop.appendChild(opt);
+
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+      function get_state_data(){
+        let state_id=stateDrop.value
+        axios.get(`https://www.cowin.gov.in/api/v2/admin/location/districts/${state_id}`)
+        .then((res)=>{
+          console.log(res.data);
+          res.data["districts"].forEach((district)=>{
+            var opt=document.createElement("option");
+            opt.setAttribute("value",district.district_id)
+            opt.innerText=district.district_name
+            districtDrop.appendChild(opt);
+          })
+        })
+        .catch((error) => {
+        console.log(error);
+      });
+      }
+      function get_data()
+      {
+        let district_id=districtDrop.value
+        let age=document.getElementById("age").value
+        let date=document.getElementById("date1").value
+        if(district_id&&age&&date)
+        {
+          axios.get(`https://www.cowin.gov.in/api/v2/appointment/sessions/public/findByDistrict?district_id=${district_id}&date=${date}`)
+          .then((res)=>{
+            console.log(res.data);
+              let filter_data=res.data.sessions.filter((ss)=>parseInt(ss.min_age_limit,10)==age)
+              console.log(filter_data);
+              let name=document.getElementById("name")
+              let address=document.getElementById("address")
+              let vaccine_type=document.getElementById("vaccine_type")
+              let min_age=document.getElementById("min_age")
+              let fee_type=document.getElementById("fee_type")
+              let fee=document.getElementById("fee")
+              let available_capacity=document.getElementById("available_capacity")
+              let dose_1=document.getElementById("dose_1")
+              let dose_2=document.getElementById("dose_2")
+              let slot1=document.getElementById("slot1")
+              let slot2=document.getElementById("slot2")
+              let slot3=document.getElementById("slot3")
+              let slot4=document.getElementById("slot4")
+              res.data.sessions.forEach((ss)=>{
+                let name_val=document.createElement("td")
+                let address_val=document.createElement("td")
+                let vaccine_type_val=document.createElement("td")
+                let min_age_val=document.createElement("td")
+                let fee_type_val=document.createElement("td")
+                let fee_val=document.createElement("td")
+                let available_capacity_val=document.createElement("td")
+                let dose_1_val=document.createElement("td")
+                let dose_2_val=document.createElement("td")
+                let slot1_val=document.createElement("td")
+                let slot2_val=document.createElement("td")
+                let slot3_val=document.createElement("td")
+                let slot4_val=document.createElement("td")
+                
+                name_val.innerText=ss["name"]
+                address_val.innerText=ss["address"]
+                vaccine_type_val.innerText=ss["vaccine"]
+                min_age_val.innerText=ss["min_age_limit"]
+                fee_type_val.innerText=ss["fee_type"]
+                fee_val.innerText=ss["fee"]
+                available_capacity_val.innerText=ss["available_capacity"]
+                dose_1_val.innerText=ss["available_capacity_dose1"]
+                dose_2_val.innerText=ss["available_capacity_dose2"]
+                slot1_val.innerText=(ss.slots[0]?ss.slots[0]:"-")
+                slot2_val.innerText=(ss.slots[1]?ss.slots[1]:"-")
+                slot3_val.innerText=(ss.slots[2]?ss.slots[2]:"-")
+                slot4_val.innerText=(ss.slots[3]?ss.slots[3]:"-")
+
+                name.appendChild(name_val)
+                address.appendChild(address_val)
+                vaccine_type.appendChild(vaccine_type_val)
+                min_age.appendChild(min_age_val)
+                fee_type.appendChild(fee_type_val)
+                fee.appendChild(fee_val)
+                available_capacity.appendChild(available_capacity_val)
+                dose_1.appendChild(dose_1_val)
+                dose_2.appendChild(dose_2_val)
+                slot1.appendChild(slot1_val)
+                slot2.appendChild(slot2_val)
+                slot3.appendChild(slot3_val)
+                slot4.appendChild(slot4_val)
+              })
+
+          })
+          .catch((error) => {
+        console.log(error);
+
+      });
+
+        }
+        else
+        {
+          alert("Provide all the fields.")
+        }
+      }
+      
+      
+  </script>
+
+</html>
